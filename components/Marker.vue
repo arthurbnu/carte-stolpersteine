@@ -1,8 +1,11 @@
 <template>
-    <l-marker :lat-lng="coords">
+    <l-marker :lat-lng="coords" class="">
         <l-tooltip>
             {{ title }}
         </l-tooltip>
+        <l-popup>
+             <slot></slot>
+        </l-popup>
     </l-marker>
 </template>
 
@@ -13,10 +16,6 @@ const props = defineProps({
         type: String,
         required: true
     },
-    place: {
-        type: String,
-        required: true
-    },
     coords: {
         type: Array,
         required: true
@@ -24,3 +23,18 @@ const props = defineProps({
 })
 
 </script>
+
+<style>
+
+@media (hover: none) {
+    .leaflet-tooltip-pane{
+        display: none;
+    }
+}
+
+@media (hover: hover) {
+    .leaflet-popup-pane{
+        display: none;
+    }
+}
+</style>

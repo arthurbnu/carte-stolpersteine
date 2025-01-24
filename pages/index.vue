@@ -5,8 +5,9 @@
          <select v-model="currentCity" id = "current-city">
             <option v-for="city in cities" :value="city.id">{{ city.name }}</option>
         </select>
-        <section class="w-[100vw] h-[100vh]">
-            <LMap v-if="!pending" ref="map" :zoom="zoom" @click="clickedMarker = null"
+        <section class="w-[100vw] h-[100vh]" :class = "{'animate-pulse': pending}">
+            <LMap ref="map" :zoom="zoom" 
+                @click="clickedMarker = null"
                 :center="[sparqlResult[0].latitude.value, sparqlResult[0].longitude.value]"
                 :use-global-leaflet="false">
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -14,7 +15,10 @@
                     layer-type="base" name="OpenStreetMap" />
                 <Marker v-for="stolperstein in sparqlResult" @click="clickedMarker = stolperstein"
                     :coords="[stolperstein.latitude.value, stolperstein.longitude.value]"
-                    :title="stolperstein.stolpersteinLabel.value" :place="stolperstein.stolpersteinLabel.value">
+                    :title="stolperstein.stolpersteinLabel.value">
+                    
+                    <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker" class="block md:hidden w-[90vw]"/>
+
                 </Marker>
                 <!-- cercle pour mettre en évidence du marqueur cliqué  -->
                 <l-circle-marker v-if = "clickedMarker" 
@@ -24,7 +28,9 @@
             </LMap>
         </section>
 
-        <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker" />
+        <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker"
+            class = "hidden md:block absolute z-[1000] right-0 top-0 w-[25vw] h-full !mt-0 p-4 bg-white/90 transition-all duration-500 ease-in-out will-change-[right] border-gray-300 border-l-8 border-solid"
+        />
 
         <section class="hidden">
             <pre>
@@ -60,11 +66,12 @@ const currentCity = ref(cities[0].id);
 
 const request = computed( () => 
 `#defaultView:Map
-    SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude WHERE {
+    SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],fr". }
-      ?stolperstein (wdt:P31/wdt:P279*) wd:Q26703203.
-      ?stolperstein wdt:P131 wd:${currentCity.value}.
-      ?stolperstein wdt:P625 ?coords.
+      ?stolperstein (wdt:P31/wdt:P279*) wd:Q26703203;
+        wdt:P131 wd:${currentCity.value};
+        wdt:P625 ?coords.
+        OPTIONAL { ?stolperstein wdt:P18 ?image}
       BIND(geof:latitude(?coords) AS ?latitude)
       BIND(geof:longitude(?coords) AS ?longitude)
     }`
@@ -85,4 +92,20 @@ const { data: sparqlResult, error, pending, execute: refresh } = await useFetch(
     z-index: 1000;
 }
 
+ @media screen and (max-width: 640px) {
+    #current-city{
+        left: unset;
+        right: 10px;
+    }
+    
+  } 
+ 
+
+</style>
+
+<style>
+
+.leaflet-popup{
+    width: 90vw;
+}
 </style>

@@ -1,11 +1,12 @@
 <template>
-    <section 
-        class = "absolute z-[1000] right-0 top-0 w-[25vw] h-full !mt-0 p-4 bg-white/90 transition-all duration-500 ease-in-out will-change-[right]"
-        :class = "{'right-[-25vw]' : !mounted}">
+    <section :class = "{'right-[-25vw]' : !mounted}">
         <h2 class="text-lg">{{ stolperstein.stolpersteinLabel.value }}</h2>
         <p>
             <a :href="stolperstein.stolperstein.value" target="_blank" class = "text-blue-500 underline">
-                Voir sur Wikidata</a>
+                Voir sur Wikidata
+            </a>
+            <img v-if = "stolperstein.image" :src="stolperstein.image.value" :alt="stolperstein.stolpersteinLabel.value" 
+                class = "my-3 max-w-[80vw] max-h-[60vh] md:max-w-[70%] md:max-h-[20%]"/>
         </p>
     </section>
 </template>
