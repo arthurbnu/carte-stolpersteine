@@ -6,7 +6,9 @@
             <option v-for="city in cities" :value="city.id">{{ city.name }}</option>
         </select>
         <section class="w-[100vw] h-[100vh]" :class = "{'animate-pulse': pending}">
-            <LMap ref="map" :zoom="zoom" 
+            <LMap
+                v-if = "sparqlResult" 
+                ref="map" :zoom="zoom" 
                 @click="clickedMarker = null"
                 :center="[sparqlResult[0].latitude.value, sparqlResult[0].longitude.value]"
                 :use-global-leaflet="false">
