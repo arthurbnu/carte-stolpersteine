@@ -3,11 +3,12 @@
     <main>
         <!-- <input type="text" v-model="currentCity" id = "current-city"/> -->
          <select v-model="currentCity" id = "current-city">
-            <option v-for="city in cities" :value="city.id">{{ city.name }}</option>
+            <!-- <option v-for="city in citiesResult" :value="city.id">{{ city.name }}</option> -->
+            <option v-for="city in citiesResult" :value="city.id">{{ city.name }}</option>
         </select>
         <section class="w-[100vw] h-[100vh]" :class = "{'animate-pulse': pending}">
             <LMap
-                v-if = "sparqlResult" 
+                v-if = "sparqlResult?.length > 0" 
                 ref="map" :zoom="zoom" 
                 @click="clickedMarker = null"
                 :center="[sparqlResult[0].latitude.value, sparqlResult[0].longitude.value]"
@@ -50,17 +51,12 @@
 const clickedMarker = ref(null);
 
 const zoom = ref(15);
-const center = ref([47.413220, -1.219482]);
+// const center = ref([47.413220, -1.219482]);
 
 const cities = [
-    {name: 'Saverne', id: 'Q22741'},
     {name: 'Strasbourg', id : 'Q6602'},
+    {name: 'Saverne', id: 'Q22741'},
     {name: 'Bouxwiller ', id: 'Q22740'},
-    // {name: 'Benfeld', id: 'Q22776'},
-    // {name: 'Balbrom', id: 'Q22793'},
-    // {name: 'Barr ', id: 'Q22758'},
-    // {name: 'Bischwiller ', id: 'Q22431'},
-    // {name: 'Gries ', id: 'Q22481'},
 ]
 
 const currentCity = ref(cities[0].id);
@@ -104,6 +100,28 @@ GROUP BY ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?p
 const url = computed(() => `https://query.wikidata.org/sparql?query=${encodeURIComponent(request.value)}&format=json`)
 const headers = { 'Accept': 'application/json' }
 const { data: sparqlResult, error, pending, execute: refresh } = await useFetch(url, { headers: headers, server: false, transform: res => res.results.bindings });
+
+
+// Récupération de la liste des villes du Bas-Rhin ayant des stolpersteine
+const citiesRequest = `
+#title: Villes du Bas-Rhin ayant des stolpersteine
+SELECT DISTINCT ?ville ?villeLabel WHERE {
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "fr". }
+  ?stolperstein (wdt:P31/(wdt:P279*)) wd:Q26703203;
+    wdt:P625 ?coords;
+    wdt:P131 ?ville.
+  ?ville wdt:P131 wd:Q12717.
+}`
+
+const { data: citiesResult, error: citiesError, status: citiesStatus, execute: citiesRefresh } = 
+await useFetch("https://query.wikidata.org/sparql", { 
+    headers,
+    params: { query: citiesRequest, format: 'json' },
+    server: false,
+    transform: res => res.results.bindings.map( city => ({ name: city.villeLabel.value, id: city.ville.value.replace('http://www.wikidata.org/entity/', '') }) )
+});
+// console.log(citiesResult.value);
+
 
 </script>
 
