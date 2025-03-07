@@ -111,7 +111,9 @@ SELECT DISTINCT ?ville ?villeLabel WHERE {
     wdt:P625 ?coords;
     wdt:P131 ?ville.
   ?ville wdt:P131 wd:Q12717.
-}`
+}
+ORDER BY ?villeLabel  
+`
 
 const { data: citiesResult, error: citiesError, status: citiesStatus, execute: citiesRefresh } = 
 await useFetch("https://query.wikidata.org/sparql", { 
