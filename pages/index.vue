@@ -15,9 +15,9 @@
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&amp;copy; <a href=&quot;https://www.openstreetmap.org/&quot;>OpenStreetMap</a> contributors"
                     layer-type="base" name="OpenStreetMap" />
-                <Marker v-for="stolperstein in sparqlResult" @click="clickedMarker = stolperstein"
+                <Marker v-for="stolperstein in sparqlResult" :key = "stolperstein.stolperstein.value" @click="clickedMarker = stolperstein"
                     :coords="[stolperstein.latitude.value, stolperstein.longitude.value]"
-                    :title="stolperstein.stolpersteinLabel.value">
+                    :title="stolperstein.personLabel.value">
                     
                     <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker" class="block md:hidden w-[90vw]"/>
 
@@ -65,18 +65,40 @@ const cities = [
 
 const currentCity = ref(cities[0].id);
 
-
 const request = computed( () => 
-`#defaultView:Map
-    SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image WHERE {
+`#defaultView:
+    SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?person ?personLabel  ?dateNaissanceLabel ?lieuNaissanceLabel  
+# ?year ?month ?day
+(GROUP_CONCAT(DISTINCT ?lieuDetentionLabel; SEPARATOR = " | ") AS ?lieuDetentionLabels) 
+
+WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],fr". }
       ?stolperstein (wdt:P31/wdt:P279*) wd:Q26703203;
         wdt:P131 wd:${currentCity.value};
+        wdt:P547 ?person;
         wdt:P625 ?coords.
-        OPTIONAL { ?stolperstein wdt:P18 ?image}
+      
+#       ?person wdt:P735 ?prenom;
+#               wdt:P734 ?nom.
+      OPTIONAL {?person wdt:P19 ?lieuNaissance}
+      OPTIONAL {?person wdt:P569 ?dateNaissance.
+#                bind (year(?dateNaissance) as ?year)
+#                bind (month(?dateNaissance) as ?month)
+#                bind (day(?dateNaissance) as ?day)
+               }
+      OPTIONAL {?person wdt:P2632 ?lieuDetention}
+      OPTIONAL { ?stolperstein wdt:P18 ?image}
+    
+      SERVICE wikibase:label {
+        bd:serviceParam wikibase:language "fr".
+        ?lieuDetention rdfs:label ?lieuDetentionLabel.
+      }
+  
       BIND(geof:latitude(?coords) AS ?latitude)
       BIND(geof:longitude(?coords) AS ?longitude)
-    }`
+    }
+
+GROUP BY ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?person ?personLabel ?dateNaissanceLabel ?lieuNaissanceLabel `
 )
 
 const url = computed(() => `https://query.wikidata.org/sparql?query=${encodeURIComponent(request.value)}&format=json`)
