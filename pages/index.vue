@@ -24,7 +24,11 @@
 
                 </Marker>
 
-                <l-marker v-if="userPosition" :lat-lng="userPosition" />
+                <l-marker v-if="userPosition" :lat-lng="userPosition" >
+                    <l-tooltip>
+                        Vous êtes ici
+                    </l-tooltip>
+                </l-marker>
                 <!-- cercle pour mettre en évidence du marqueur cliqué  -->
                 <!-- <l-circle-marker v-if="clickedMarker"
                     :lat-lng="[clickedMarker.latitude.value, clickedMarker.longitude.value]" :radius="6" color="green">
