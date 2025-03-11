@@ -23,6 +23,8 @@
                     <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker" class="min-w-[90%]" />
 
                 </Marker>
+
+                <l-marker v-if="userPosition" :lat-lng="userPosition" />
                 <!-- cercle pour mettre en évidence du marqueur cliqué  -->
                 <!-- <l-circle-marker v-if="clickedMarker"
                     :lat-lng="[clickedMarker.latitude.value, clickedMarker.longitude.value]" :radius="6" color="green">
@@ -133,8 +135,17 @@ const centerPoint = computed(() => {
         const lon = sparqlResult.value.reduce((acc, stolperstein) => acc + parseFloat(stolperstein.longitude.value), 0) / sparqlResult.value.length;
         return [lat, lon];
     }
-    // return [47.413220, -1.219482];
 })
+
+const userPosition = ref(null);
+onMounted(() => {
+    if (navigator.geolocation) {
+        const watchId = navigator.geolocation.watchPosition(position => {
+            userPosition.value = [position.coords.latitude, position.coords.longitude];
+        });
+    }  
+});
+
 
 
 </script>
