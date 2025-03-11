@@ -2,9 +2,9 @@
     <section :class = "{'right-[-25vw]' : !mounted}">
         <!-- <h2 class="text-lg">{{ stolperstein.personLabel.value }}</h2> -->
         <h2 class="text-lg my-3">{{ stolperstein.stolpersteinLabel.value }}</h2>
-        <p class="flex gap-3">
+        <p>
             Voir sur Wikidata :
-            <a :href="stolperstein.person.value" target="_blank" class = "text-blue-500 underline">
+            <a :href="stolperstein.person.value" target="_blank" class = "text-blue-500 underline mr-2">
                 {{ stolperstein.personLabel.value }}
             </a>
             <a :href="stolperstein.stolperstein.value" target="_blank" class = "text-blue-500 underline">

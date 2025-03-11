@@ -20,7 +20,7 @@
                     :coords="[stolperstein.latitude.value, stolperstein.longitude.value]"
                     :title="stolperstein.personLabel.value">
                     
-                    <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker" class="block md:hidden w-[90vw]"/>
+                    <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker" class="block md:hidden min-w-[90%]"/>
 
                 </Marker>
                 <!-- cercle pour mettre en évidence du marqueur cliqué  -->
