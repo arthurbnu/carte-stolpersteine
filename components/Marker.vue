@@ -1,12 +1,10 @@
 <template>
     <l-marker :lat-lng="coords" class="">
         <l-icon
-            icon-url="stolperstein.png"
+            :icon-url="highlight ? 'stolperstein-highlight.png' : 'stolperstein.png'"
             :icon-size="[30, 30]"
             :icon-anchor="[15, 35]"
             :tooltip-anchor="[10, -20]"
-      
-
         ></l-icon>
         <l-tooltip>
             {{ title }}
@@ -27,6 +25,10 @@ const props = defineProps({
     coords: {
         type: Array,
         required: true
+    },
+    highlight: {
+        type: Boolean,
+        default: true
     }
 })
 

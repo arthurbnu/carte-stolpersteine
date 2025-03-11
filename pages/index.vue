@@ -8,12 +8,14 @@
         </select>
         <section class="w-[100vw] h-[100vh]" :class="{ 'animate-pulse': pending }">
             <LMap v-if="sparqlResult?.length > 0" ref="map" :zoom="zoom" @click="clickedMarker = null"
-                :center="[sparqlResult[0].latitude.value, sparqlResult[0].longitude.value]" :use-global-leaflet="false"
+                :center="centerPoint"
+                :use-global-leaflet="false"
                 >
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&amp;copy; <a href=&quot;https://www.openstreetmap.org/&quot;>OpenStreetMap</a> contributors"
                     layer-type="base" name="OpenStreetMap" />
                 <Marker v-for="stolperstein in sparqlResult" :key="stolperstein.stolperstein.value"
+                :highlight="clickedMarker === stolperstein"
                     @click="clickedMarker = stolperstein"
                     :coords="[stolperstein.latitude.value, stolperstein.longitude.value]"
                     :title="stolperstein.personLabel.value">
@@ -23,9 +25,9 @@
 
                 </Marker>
                 <!-- cercle pour mettre en évidence du marqueur cliqué  -->
-                <l-circle-marker v-if="clickedMarker"
+                <!-- <l-circle-marker v-if="clickedMarker"
                     :lat-lng="[clickedMarker.latitude.value, clickedMarker.longitude.value]" :radius="6" color="green">
-                </l-circle-marker>
+                </l-circle-marker> -->
             </LMap>
         </section>
 
@@ -124,6 +126,16 @@ const { data: citiesResult, error: citiesError, status: citiesStatus, execute: c
         transform: res => res.results.bindings.map(city => ({ name: city.villeLabel.value, id: city.ville.value.replace('http://www.wikidata.org/entity/', '') }))
     });
 // console.log(citiesResult.value);
+
+// Calcule le centre de la carte
+const centerPoint = computed(() => {
+    if (sparqlResult.value?.length > 0) {
+        const lat = sparqlResult.value.reduce((acc, stolperstein) => acc + parseFloat(stolperstein.latitude.value), 0) / sparqlResult.value.length;
+        const lon = sparqlResult.value.reduce((acc, stolperstein) => acc + parseFloat(stolperstein.longitude.value), 0) / sparqlResult.value.length;
+        return [lat, lon];
+    }
+    // return [47.413220, -1.219482];
+})
 
 
 </script>
