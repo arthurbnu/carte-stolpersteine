@@ -40,9 +40,16 @@ const props = defineProps({
     }
 }
 
-@media (hover: hover) {
+/* @media (hover: hover) {
     .leaflet-popup-pane{
         display: none;
+    }
+} */
+
+/*  tailwind md */
+@media (min-width: 768px) {
+    .leaflet-popup-pane{
+        display: none ;
     }
 }
 </style>

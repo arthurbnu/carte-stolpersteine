@@ -14,15 +14,17 @@
 
 
         <p>
-           Né·e le {{ toFrenchDate(stolperstein.dateNaissanceLabel?.value) }} à {{ stolperstein.lieuNaissanceLabel?.value }}
+            {{ toFrenchDate(stolperstein.dateNaissanceLabel?.value) }}  ({{ stolperstein.lieuNaissanceLabel?.value }})
+            -
+            {{ toFrenchDate(stolperstein.dateMortLabel?.value) }}  ({{ stolperstein.lieuMortLabel?.value }})
         </p>
 
         <p>
             Lieu·x de détention : {{ stolperstein.lieuDetentionLabels?.value }}
         </p>
 
-            <img v-if = "stolperstein.image" :src="stolperstein.image.value" :alt="stolperstein.stolpersteinLabel.value" 
-                class = "my-3 max-w-[80vw] max-h-[60vh] md:max-w-[70%] md:max-h-[20%]"/>
+        <img v-if = "stolperstein.image" :src="stolperstein.image.value" :alt="stolperstein.stolpersteinLabel.value" 
+            class = "my-3 max-w-[80vw] max-h-[60vh] md:max-w-[70%] md:max-h-[20%]"/>
     </section>
 </template>
 
