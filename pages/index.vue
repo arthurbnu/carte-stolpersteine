@@ -32,7 +32,7 @@
         </section>
 
         <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker"
-            class="hidden md:block absolute z-[1000] right-0 top-0 w-[25vw] h-full !mt-0 p-4 bg-white/90 transition-all duration-500 ease-in-out will-change-[right] border-gray-300 border-l-8 border-solid" />
+            class="hidden lg:block absolute z-[1000] right-0 top-0 w-[25vw] h-full !mt-0 p-4 bg-white/90 transition-all duration-500 ease-in-out will-change-[right] border-gray-300 border-l-8 border-solid" />
 
         <section class="hidden">
             <pre>

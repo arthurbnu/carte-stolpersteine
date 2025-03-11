@@ -3,7 +3,7 @@
         <l-icon
             :icon-url="highlight ? 'stolperstein-highlight.png' : 'stolperstein.png'"
             :icon-size="[30, 30]"
-            :icon-anchor="[15, 35]"
+            :icon-anchor="[15, 25]"
             :tooltip-anchor="[10, -20]"
         ></l-icon>
         <l-tooltip>
@@ -48,8 +48,8 @@ const props = defineProps({
     }
 } */
 
-/*  tailwind md */
-@media (min-width: 768px) {
+/*  tailwind lg */
+@media (min-width: 1024px) {
     .leaflet-popup-pane{
         display: none ;
     }
