@@ -15,13 +15,12 @@
                     attribution="&amp;copy; <a href=&quot;https://www.openstreetmap.org/&quot;>OpenStreetMap</a> contributors"
                     layer-type="base" name="OpenStreetMap" />
                 <Marker v-for="stolperstein in sparqlResult" :key="stolperstein.stolperstein.value"
-                :highlight="clickedMarker === stolperstein"
                     @click="clickedMarker = stolperstein"
+                    :highlight="clickedMarker === stolperstein"
                     :coords="[stolperstein.latitude.value, stolperstein.longitude.value]"
                     :title="stolperstein.personLabel.value">
 
-                    <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker"
-                        class="block md:hidden min-w-[90%]" />
+                    <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker" class="min-w-[90%]" />
 
                 </Marker>
                 <!-- cercle pour mettre en évidence du marqueur cliqué  -->
