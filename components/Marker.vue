@@ -4,7 +4,7 @@
             :icon-url="highlight ? 'stolperstein-highlight.png' : 'stolperstein.png'"
             :icon-size="[30, 30]"
             :icon-anchor="[15, 25]"
-            :tooltip-anchor="[10, -20]"
+            :tooltip-anchor="[10, -10]"
         ></l-icon>
         <l-tooltip>
             {{ title }}
