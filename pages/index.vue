@@ -8,23 +8,21 @@
         </select>
         <section class="w-[100vw] h-[100vh]" :class="{ 'animate-pulse': pending }">
             <LMap v-if="sparqlResult?.length > 0" ref="map" :zoom="zoom" @click="clickedMarker = null"
-                :center="centerPoint"
-                :use-global-leaflet="false"
-                >
+                :center="centerPoint" :use-global-leaflet="false">
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&amp;copy; <a href=&quot;https://www.openstreetmap.org/&quot;>OpenStreetMap</a> contributors"
                     layer-type="base" name="OpenStreetMap" />
                 <Marker v-for="stolperstein in sparqlResult" :key="stolperstein.stolperstein.value"
-                    @click="clickedMarker = stolperstein"
-                    :highlight="clickedMarker === stolperstein"
+                    @click="handleMarkerClick(stolperstein)" :highlight="clickedMarker === stolperstein"
                     :coords="[stolperstein.latitude.value, stolperstein.longitude.value]"
-                    :title="stolperstein.personLabel.value">
+                    :title="stolperstein.people ?? stolperstein.personLabel.value">
 
-                    <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker" class="min-w-[90%]" />
+                    <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker"
+                        :allClickedMarkers="allClickedMarkers" class="min-w-[90%]" />
 
                 </Marker>
 
-                <l-marker v-if="userPosition" :lat-lng="userPosition" >
+                <l-marker v-if="userPosition" :lat-lng="userPosition">
                     <l-tooltip>
                         Vous êtes ici
                     </l-tooltip>
@@ -51,6 +49,16 @@
 </template>
 
 <script setup>
+
+// Tous les marqueurs de stolpersteine qui ont les mêmes coordonnées que le marqueur cliqué
+const allClickedMarkers = ref([]);
+const handleMarkerClick = (stolperstein) => {
+    clickedMarker.value = stolperstein;
+    const sameCoords = sparqlResult.value.filter(stolp => stolp.latitude.value === stolperstein.latitude.value && stolp.longitude.value === stolperstein.longitude.value);
+    allClickedMarkers.value = sameCoords;
+}
+
+provide("allClickedMarkers", allClickedMarkers);
 
 const clickedMarker = ref(null);
 
@@ -130,7 +138,6 @@ const { data: citiesResult, error: citiesError, status: citiesStatus, execute: c
         server: false,
         transform: res => res.results.bindings.map(city => ({ name: city.villeLabel.value, id: city.ville.value.replace('http://www.wikidata.org/entity/', '') }))
     });
-// console.log(citiesResult.value);
 
 // Calcule le centre de la carte
 const centerPoint = computed(() => {
@@ -147,7 +154,33 @@ onMounted(() => {
         const watchId = navigator.geolocation.watchPosition(position => {
             userPosition.value = [position.coords.latitude, position.coords.longitude];
         });
-    }  
+    }
+});
+
+
+watchEffect(() => {
+    // on vérifie si certains points sont au même endroit
+    if (sparqlResult.value?.length > 0) {
+        const coordCounts = {};
+        sparqlResult.value.forEach(stolperstein => {
+            const coord = `${stolperstein.latitude.value},${stolperstein.longitude.value}`;
+            if (coordCounts[coord]) {
+                coordCounts[coord]++;
+            } else {
+                coordCounts[coord] = 1;
+            }
+        });
+        const duplicates = Object.keys(coordCounts).filter(coord => coordCounts[coord] > 1);
+
+        // On met les noms des personnes dans le champ people
+        duplicates.forEach(coord => {
+            const sameCoords = sparqlResult.value.filter(stolp => `${stolp.latitude.value},${stolp.longitude.value}` === coord);
+            const people = sameCoords.map(stolp => stolp.personLabel.value).join(', ');
+            sameCoords.forEach(stolp => {
+                stolp.people = people
+            });
+        });
+    }
 });
 
 
