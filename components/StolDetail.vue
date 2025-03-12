@@ -25,7 +25,7 @@
 
                 <img v-if="stolperstein.image" :src="stolperstein.image.value"
                     :alt="stolperstein.stolpersteinLabel.value"
-                    class="my-3 max-w-[80vw] max-h-[60vh] md:max-w-[70%] md:max-h-[20%]" />
+                    class="my-3 max-w-[70vw] max-h-[60vh] md:max-w-[70%] md:max-h-[20%]" />
             </li>
         </ul>
     </section>
