@@ -2,7 +2,7 @@
 
     <main>
         <!-- <input type="text" v-model="currentCity" id = "current-city"/> -->
-        <select v-model="currentCity" id="current-city">
+        <select v-model="currentCity" id="current-city" class = "max-w-[30vw]">
             <!-- <option v-for="city in citiesResult" :value="city.id">{{ city.name }}</option> -->
             <option v-for="city in citiesResult" :value="city.id">{{ city.name }}</option>
         </select>
