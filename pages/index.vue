@@ -74,43 +74,36 @@ const cities = [
 const currentCity = ref(cities[0].id);
 
 const request = computed(() =>
-    `#defaultView:
-    SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?person ?personLabel  ?dateNaissanceLabel ?lieuNaissanceLabel ?dateMortLabel ?lieuMortLabel  
-# ?year ?month ?day
+`#title: Stolpersteine
+SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?person ?personLabel 
 (GROUP_CONCAT(DISTINCT ?lieuDetentionLabel; SEPARATOR = " | ") AS ?lieuDetentionLabels) 
-
-WHERE {
-      SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],fr". }
-      ?stolperstein (wdt:P31/wdt:P279*) wd:Q26703203;
-        wdt:P131 wd:${currentCity.value};
-        wdt:P547 ?person;
-        wdt:P625 ?coords.
-      
-#       ?person wdt:P735 ?prenom;
-#               wdt:P734 ?nom.
-      OPTIONAL {?person wdt:P19 ?lieuNaissance}
-      OPTIONAL {?person wdt:P20 ?lieuMort}
-
-  OPTIONAL {?person wdt:P569 ?dateNaissance
-                      OPTIONAL {?person wdt:P570 ?dateMort}
-.
-#                bind (year(?dateNaissance) as ?year)
-#                bind (month(?dateNaissance) as ?month)
-#                bind (day(?dateNaissance) as ?day)
-               }
-      OPTIONAL {?person wdt:P2632 ?lieuDetention}
-      OPTIONAL { ?stolperstein wdt:P18 ?image}
-    
-      SERVICE wikibase:label {
-        bd:serviceParam wikibase:language "fr".
-        ?lieuDetention rdfs:label ?lieuDetentionLabel.
-      }
-  
-      BIND(geof:latitude(?coords) AS ?latitude)
-      BIND(geof:longitude(?coords) AS ?longitude)
-    }
-
-GROUP BY ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?person ?personLabel ?dateNaissanceLabel ?lieuNaissanceLabel ?dateMortLabel ?lieuMortLabel   `
+(GROUP_CONCAT(DISTINCT ?lieuNaissanceLabel; SEPARATOR = " | ") AS ?lieuNaissanceLabels) 
+(GROUP_CONCAT(DISTINCT ?lieuMortLabel; SEPARATOR = " | ") AS ?lieuMortLabels) 
+(GROUP_CONCAT(DISTINCT ?dateNaissanceLabel; SEPARATOR = " | ") AS ?dateNaissanceLabels) 
+(GROUP_CONCAT(DISTINCT ?dateMortLabel; SEPARATOR = " | ") AS ?dateMortLabels) WHERE {
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],fr". }
+  ?stolperstein (wdt:P31/(wdt:P279*)) wd:Q26703203;
+    wdt:P131 wd:${currentCity.value};
+    wdt:P547 ?person;
+    wdt:P625 ?coords.
+  OPTIONAL { ?person wdt:P19 ?lieuNaissance. }
+  OPTIONAL { ?person wdt:P20 ?lieuMort. }
+  OPTIONAL { ?person wdt:P569 ?dateNaissance. }
+  OPTIONAL { ?person wdt:P570 ?dateMort. }
+  OPTIONAL { ?person wdt:P2632 ?lieuDetention. }
+  OPTIONAL { ?stolperstein wdt:P18 ?image. }
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "fr".
+    ?lieuDetention rdfs:label ?lieuDetentionLabel.
+    ?lieuNaissance rdfs:label ?lieuNaissanceLabel.
+    ?lieuMort rdfs:label ?lieuMortLabel.
+    ?dateNaissance rdfs:label ?dateNaissanceLabel.
+    ?dateMort rdfs:label ?dateMortLabel.
+  }
+  BIND(geof:latitude(?coords) AS ?latitude)
+  BIND(geof:longitude(?coords) AS ?longitude)
+}
+GROUP BY ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?person ?personLabel   `
 )
 
 const url = computed(() => `https://query.wikidata.org/sparql?query=${encodeURIComponent(request.value)}&format=json`)

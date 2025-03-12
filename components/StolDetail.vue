@@ -14,9 +14,9 @@
                 </p>
 
                 <p>
-                    {{ toFrenchDate(stolperstein.dateNaissanceLabel?.value) }} ({{ stolperstein.lieuNaissanceLabel?.value}})
+                    {{ toFrenchDate(stolperstein.dateNaissanceLabels?.value) }} ({{ stolperstein.lieuNaissanceLabels?.value}})
                     -
-                    {{ toFrenchDate(stolperstein.dateMortLabel?.value) }} ({{ stolperstein.lieuMortLabel?.value }})
+                    {{ toFrenchDate(stolperstein.dateMortLabels?.value) }} ({{ stolperstein.lieuMortLabels?.value }})
                 </p>
 
                 <p>
@@ -33,13 +33,11 @@
 
 <script setup>
 
+const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+const dateSeparator = " | ";
+const toFrenchDate = date => date.split(dateSeparator).map(d => new Date(d).toLocaleDateString('fr-FR', dateOptions)).join(dateSeparator);
+
 const mounted = ref(false);
-
-const toFrenchDate = (date) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(date).toLocaleDateString('fr-FR', options);
-}
-
 onMounted(() => {
     setTimeout(() => {
         mounted.value = true;
