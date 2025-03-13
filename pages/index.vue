@@ -3,8 +3,7 @@
     <main>
         <!-- <input type="text" v-model="currentCity" id = "current-city"/> -->
         <select v-model="currentCity" id="current-city" class = "max-w-[30vw]">
-            <!-- <option v-for="city in citiesResult" :value="city.id">{{ city.name }}</option> -->
-            <option v-for="city in citiesResult" :value="city.id">{{ city.name }}</option>
+            <option v-for="city in citiesResult" :key="city.id" :value="city.id">{{ city.name }}</option>
         </select>
         <section class="w-[100vw] h-[100vh]" :class="{ 'animate-pulse': pending }">
             <LMap v-if="sparqlResult?.length > 0" ref="map" :zoom="zoom" @click="clickedMarker = null"
@@ -50,6 +49,7 @@
 
 <script setup>
 
+const clickedMarker = ref(null);
 // Tous les marqueurs de stolpersteine qui ont les mêmes coordonnées que le marqueur cliqué
 const allClickedMarkers = ref([]);
 const handleMarkerClick = (stolperstein) => {
@@ -59,8 +59,6 @@ const handleMarkerClick = (stolperstein) => {
 }
 
 provide("allClickedMarkers", allClickedMarkers);
-
-const clickedMarker = ref(null);
 
 const zoom = ref(15);
 // const center = ref([47.413220, -1.219482]);
@@ -198,7 +196,8 @@ watchEffect(() => {
 </style>
 
 <style>
-.leaflet-popup {
-    width: 90vw;
+/* on redéfinit la largeur calculée par leaflet qui ne prend pas en compte le contenu dynamique */
+.leaflet-popup-content {
+    width: 80vw !important;
 }
 </style>

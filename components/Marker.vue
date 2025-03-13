@@ -1,16 +1,13 @@
 <template>
     <l-marker :lat-lng="coords" class="">
-        <l-icon
-            :icon-url="highlight ? 'stolperstein-highlight.png' : 'stolperstein.png'"
-            :icon-size="[30, 30]"
-            :icon-anchor="[15, 25]"
-            :tooltip-anchor="[10, -10]"
-        ></l-icon>
+       <l-icon :icon-url="highlight ? 'stolperstein-highlight.png' : 'stolperstein.png'"
+        :icon-size="[30, 30]" :icon-anchor="[15, 25]"
+            :tooltip-anchor="[10, -10]"></l-icon>
         <l-tooltip>
             {{ title }}
         </l-tooltip>
         <l-popup>
-             <slot></slot>
+            <slot></slot>
         </l-popup>
     </l-marker>
 </template>
@@ -32,12 +29,23 @@ const props = defineProps({
     }
 })
 
+const iconUrl = ref('stolperstein.png');
+
+watch(() => props.highlight, h => iconUrl.value = h ? 'stolperstein-highlight.png' : 'stolperstein.png');
+
+
 </script>
 
 <style>
+img.leaflet-marker-icon {
+    transition: all 0.2s ease-in-out;
+    &:focus {
+        filter: brightness(1.1);
+    }
+}
 
 @media (hover: none) {
-    .leaflet-tooltip-pane{
+    .leaflet-tooltip-pane {
         display: none;
     }
 }
@@ -50,8 +58,8 @@ const props = defineProps({
 
 /*  tailwind lg */
 @media (min-width: 1024px) {
-    .leaflet-popup-pane{
-        display: none ;
+    .leaflet-popup-pane {
+        display: none;
     }
 }
 </style>

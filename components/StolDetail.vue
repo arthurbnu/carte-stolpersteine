@@ -20,7 +20,7 @@
                 </p>
 
                 <p>
-                    Lieu·x de détention : {{ stolperstein.lieuDetentionLabels?.value }}
+                    Lieu·x de détention : {{ stolperstein.lieuDetentionLabels?.value || 'Non trouvé'}}
                 </p>
 
                 <img v-if="stolperstein.image" :src="stolperstein.image.value"
