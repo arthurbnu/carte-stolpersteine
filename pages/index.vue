@@ -4,12 +4,12 @@
         <!-- <input type="text" v-model="currentCity" id = "current-city"/> -->
          <!-- <fieldset class="block lg:flex"> -->
          <fieldset class="flex">
-                <select v-model="currentCity" id="current-city" class = "max-w-[30vw]">
+                <select v-model="currentCity" id="current-city" class = "max-w-[35vw]">
                     <option v-for="city in citiesResult" :key="city.id" :value="city.id" :title="city.count + ' résultats'">{{ city.name }}</option>
                 </select>
                 <br>
                 <div class = " lg:inline">
-                    <input type = "text" id = "search" v-model = "search" placeholder= "👤 rechercher" list="stolperstein-list" class = "max-w-[30vw]"/>
+                    <input type = "text" id = "search" v-model = "search" placeholder= "👤 rechercher" list="stolperstein-list" class = "max-w-[35vw]"/>
                     <datalist id="stolperstein-list">
                         <option v-for="stolperstein in searchedResults" :key="stolperstein.stolperstein.value" :value="stolperstein.personLabel.value"></option>
                     </datalist>
@@ -18,7 +18,7 @@
         </fieldset>
         <section class="w-[100vw] h-[100vh]" :class="{ 'animate-pulse': pending }">
             <LMap v-if="sparqlResult?.length > 0" ref="map" :zoom="zoom" @click="clickedMarker = null"
-                :center="centerPoint" :use-global-leaflet="false">
+                :center="centerPoint" :use-global-leaflet="false" >
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&amp;copy; <a href=&quot;https://www.openstreetmap.org/&quot;>OpenStreetMap</a> contributors"
                     layer-type="base" name="OpenStreetMap" />
@@ -167,6 +167,7 @@ onMounted(() => {
     }
 });
 
+watch(currentCity, () => search.value = '');
 
 watchEffect(() => {
     // on vérifie si certains points sont au même endroit
