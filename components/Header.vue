@@ -1,6 +1,6 @@
 <template>
     <header class="text-white p-4">
-        <h1 class="h-12 lg:h-auto text-xl sm:text-2xl font-bold ml-10">Stolpersteine du 67
+        <h1 class="h-14 lg:h-auto text-xl sm:text-2xl font-bold ml-10">Stolpersteine du 67
         </h1>
     </header>
 </template>

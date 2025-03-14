@@ -2,7 +2,8 @@
 
     <main>
         <!-- <input type="text" v-model="currentCity" id = "current-city"/> -->
-         <fieldset class="block lg:flex">
+         <!-- <fieldset class="block lg:flex"> -->
+         <fieldset class="flex">
                 <select v-model="currentCity" id="current-city" class = "max-w-[30vw]">
                     <option v-for="city in citiesResult" :key="city.id" :value="city.id" :title="city.count + ' résultats'">{{ city.name }}</option>
                 </select>
@@ -205,10 +206,12 @@ fieldset{
     z-index: 1000;
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 1024px) {
     fieldset {
-        left: unset;
-        right: 10px;
+        /* left: unset;
+        right: 10px; */
+        top: 48px;
+        left: 55px;
     }
     /*
     #current-city {
