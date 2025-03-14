@@ -1,8 +1,17 @@
 <template>
     <l-marker :lat-lng="coords" class="">
-       <l-icon :icon-url="highlight ? 'stolperstein-highlight.png' : 'stolperstein.png'"
-        :icon-size="[30, 30]" :icon-anchor="[15, 25]"
-            :tooltip-anchor="[10, -10]"></l-icon>
+        <!-- :icon-url="highlight ? 'stolperstein-highlight.png' : 'stolperstein.png'" -->
+        <l-icon 
+            :icon-url="hasImage ? 'stolperstein-avec-photo.png' : 'stolperstein.png'"
+            :icon-size="[30, 30]" :icon-anchor="[15, 25]"
+            :tooltip-anchor="[10, -10]">
+        </l-icon>
+        <!-- <div>
+            <img src="/stolperstein.png" alt="Stolperstein" width="2" height="2" class="h-7"/>
+            <div class="">
+                {{ title }}
+            </div>
+        </div> -->
         <l-tooltip>
             {{ title }}
         </l-tooltip>
@@ -26,6 +35,10 @@ const props = defineProps({
     highlight: {
         type: Boolean,
         default: true
+    },
+    hasImage: {
+        type: Boolean,
+        default: false
     }
 })
 

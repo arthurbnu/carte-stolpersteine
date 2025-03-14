@@ -2,18 +2,29 @@
 
     <main>
         <!-- <input type="text" v-model="currentCity" id = "current-city"/> -->
-        <select v-model="currentCity" id="current-city" class = "max-w-[30vw]">
-            <option v-for="city in citiesResult" :key="city.id" :value="city.id">{{ city.name }}</option>
-        </select>
+         <fieldset class="block lg:flex">
+                <select v-model="currentCity" id="current-city" class = "max-w-[30vw]">
+                    <option v-for="city in citiesResult" :key="city.id" :value="city.id" :title="city.count + ' résultats'">{{ city.name }}</option>
+                </select>
+                <br>
+                <div class = " lg:inline">
+                    <input type = "text" id = "search" v-model = "search" placeholder= "👤 rechercher" list="stolperstein-list" class = "max-w-[30vw]"/>
+                    <datalist id="stolperstein-list">
+                        <option v-for="stolperstein in searchedResults" :key="stolperstein.stolperstein.value" :value="stolperstein.personLabel.value"></option>
+                    </datalist>
+                    <span class="hidden lg:inline text-gray-500 ml-2">{{ searchedResults?.length }} résultats</span>
+                </div>
+        </fieldset>
         <section class="w-[100vw] h-[100vh]" :class="{ 'animate-pulse': pending }">
             <LMap v-if="sparqlResult?.length > 0" ref="map" :zoom="zoom" @click="clickedMarker = null"
                 :center="centerPoint" :use-global-leaflet="false">
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&amp;copy; <a href=&quot;https://www.openstreetmap.org/&quot;>OpenStreetMap</a> contributors"
                     layer-type="base" name="OpenStreetMap" />
-                <Marker v-for="stolperstein in sparqlResult" :key="stolperstein.stolperstein.value"
+                <Marker v-for="stolperstein in searchedResults" :key="stolperstein.stolperstein.value"
                     @click="handleMarkerClick(stolperstein)" :highlight="clickedMarker === stolperstein"
                     :coords="[stolperstein.latitude.value, stolperstein.longitude.value]"
+                    :has-image="test && !!stolperstein.image"
                     :title="stolperstein.people ?? stolperstein.personLabel.value">
 
                     <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker"
@@ -42,12 +53,15 @@
             </pre>
         </section>
 
-
     </main>
 
 </template>
 
 <script setup>
+
+const search = ref('')
+const getStrVal = s => s.value.trim().toUpperCase()
+const searchedResults = computed(() => sparqlResult.value?.filter(stolp => getStrVal(stolp.personLabel).includes(getStrVal(search)) ))
 
 const clickedMarker = ref(null);
 // Tous les marqueurs de stolpersteine qui ont les mêmes coordonnées que le marqueur cliqué
@@ -59,6 +73,9 @@ const handleMarkerClick = (stolperstein) => {
 }
 
 provide("allClickedMarkers", allClickedMarkers);
+
+// paramètre test si url avec ?test=1
+const test = !!useRoute().query.test;
 
 const zoom = ref(15);
 // const center = ref([47.413220, -1.219482]);
@@ -112,14 +129,15 @@ const { data: sparqlResult, error, pending, execute: refresh } = await useFetch(
 // Récupération de la liste des villes du Bas-Rhin ayant des stolpersteine
 const citiesRequest = `
 #title: Villes du Bas-Rhin ayant des stolpersteine
-SELECT DISTINCT ?ville ?villeLabel WHERE {
+SELECT ?ville ?villeLabel (COUNT(?stolperstein) AS ?stolpersteinCount) WHERE {
   SERVICE wikibase:label { bd:serviceParam wikibase:language "fr". }
   ?stolperstein (wdt:P31/(wdt:P279*)) wd:Q26703203;
     wdt:P625 ?coords;
     wdt:P131 ?ville.
   ?ville wdt:P131 wd:Q12717.
 }
-ORDER BY ?villeLabel  
+GROUP BY ?ville ?villeLabel
+ORDER BY ?villeLabel
 `
 
 const { data: citiesResult, error: citiesError, status: citiesStatus, execute: citiesRefresh } =
@@ -127,7 +145,7 @@ const { data: citiesResult, error: citiesError, status: citiesStatus, execute: c
         headers,
         params: { query: citiesRequest, format: 'json' },
         server: false,
-        transform: res => res.results.bindings.map(city => ({ name: city.villeLabel.value, id: city.ville.value.replace('http://www.wikidata.org/entity/', '') }))
+        transform: res => res.results.bindings.map(city => ({ name: city.villeLabel.value, id: city.ville.value.replace('http://www.wikidata.org/entity/', ''), count: city.stolpersteinCount.value }))
     });
 
 // Calcule le centre de la carte
@@ -179,7 +197,8 @@ watchEffect(() => {
 </script>
 
 <style scoped>
-#current-city {
+fieldset{
+    gap: 15px;
     position: fixed;
     top: 20px;
     left: 48vw;
@@ -187,10 +206,16 @@ watchEffect(() => {
 }
 
 @media screen and (max-width: 640px) {
+    fieldset {
+        left: unset;
+        right: 10px;
+    }
+    /*
     #current-city {
         left: unset;
         right: 10px;
     }
+        */
 
 }
 </style>
