@@ -51,7 +51,7 @@ watch(() => props.highlight, h => iconUrl.value = h ? 'stolperstein-highlight.pn
 
 <style>
 img.leaflet-marker-icon {
-    transition: all 0.2s ease-in-out;
+    transition: filter 0.2s ease-in-out;
     &:focus {
         filter: brightness(1.1);
     }
