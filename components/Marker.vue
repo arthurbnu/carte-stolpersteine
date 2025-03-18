@@ -1,8 +1,9 @@
 <template>
     <l-marker :lat-lng="coords" class="">
         <!-- :icon-url="highlight ? 'stolperstein-highlight.png' : 'stolperstein.png'" -->
+        <!-- :icon-url="hasImage ? 'stolperstein-avec-photo.png' : iconUrl" -->
         <l-icon 
-            :icon-url="hasImage ? 'stolperstein-avec-photo.png' : 'stolperstein.png'"
+            :icon-url="isGroup ? 'stolperstein-groupe.png' : iconUrl"
             :icon-size="[30, 30]" :icon-anchor="[15, 25]"
             :tooltip-anchor="[10, -10]">
         </l-icon>
@@ -39,13 +40,14 @@ const props = defineProps({
     hasImage: {
         type: Boolean,
         default: false
+    },
+    isGroup: {
+        type: Boolean,
+        default: false
     }
 })
 
 const iconUrl = ref('stolperstein.png');
-
-watch(() => props.highlight, h => iconUrl.value = h ? 'stolperstein-highlight.png' : 'stolperstein.png');
-
 
 </script>
 
@@ -53,7 +55,7 @@ watch(() => props.highlight, h => iconUrl.value = h ? 'stolperstein-highlight.pn
 img.leaflet-marker-icon {
     transition: filter 0.2s ease-in-out;
     &:focus {
-        filter: brightness(1.1);
+        /* filter: brightness(1.1); */
     }
 }
 

@@ -11,9 +11,9 @@
                 <div class = " lg:inline">
                     <input type = "text" id = "search" v-model = "search" placeholder= "👤 rechercher" list="stolperstein-list" class = "max-w-[35vw]"/>
                     <datalist id="stolperstein-list">
-                        <option v-for="stolperstein in searchedResults" :key="stolperstein.stolperstein.value" :value="stolperstein.personLabel.value"></option>
+                        <option v-for="stolperstein in filteredResults" :key="stolperstein.stolperstein.value" :value="stolperstein.personLabel.value"></option>
                     </datalist>
-                    <span class="hidden lg:inline text-gray-500 ml-2">{{ searchedResults?.length }} résultats</span>
+                    <span class="hidden lg:inline text-gray-500 ml-2">{{ filteredResults?.length }} résultats</span>
                 </div>
         </fieldset>
         <section class="w-[100vw] h-[100vh]" :class="{ 'animate-pulse': pending }">
@@ -22,10 +22,11 @@
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&amp;copy; <a href=&quot;https://www.openstreetmap.org/&quot;>OpenStreetMap</a> contributors"
                     layer-type="base" name="OpenStreetMap" />
-                <Marker v-for="stolperstein in searchedResults" :key="stolperstein.stolperstein.value"
+                <Marker v-for="stolperstein in filteredResults" :key="stolperstein.stolperstein.value"
                     @click="handleMarkerClick(stolperstein)" :highlight="clickedMarker === stolperstein"
                     :coords="[stolperstein.latitude.value, stolperstein.longitude.value]"
                     :has-image="test && !!stolperstein.image"
+                    :is-group="stolperstein.people"
                     :title="stolperstein.people ?? stolperstein.personLabel.value">
 
                     <StolDetail v-if="clickedMarker" :stolperstein="clickedMarker"
@@ -62,21 +63,37 @@
 
 const search = ref('')
 const getStrVal = s => s.value.trim().toUpperCase()
-const searchedResults = computed(() => sparqlResult.value?.filter(stolp => getStrVal(stolp.personLabel).includes(getStrVal(search)) ))
+const filteredResults = computed(() => sparqlResult.value?.filter(stolp => getStrVal(stolp.personLabel).includes(getStrVal(search)) ))
 
+const clickedImg = ref(null);
 const clickedMarker = ref(null);
 // Tous les marqueurs de stolpersteine qui ont les mêmes coordonnées que le marqueur cliqué
 const allClickedMarkers = ref([]);
-const handleMarkerClick = (stolperstein) => {
-    clickedMarker.value = stolperstein;
-    const sameCoords = sparqlResult.value.filter(stolp => stolp.latitude.value === stolperstein.latitude.value && stolp.longitude.value === stolperstein.longitude.value);
-    allClickedMarkers.value = sameCoords;
+
+const setBrightness = (img, value = 1) => {
+    if (img) 
+        img.style.filter = `brightness(${value})`
 }
+
+const handleMarkerClick = async stolperstein => {
+    setBrightness(clickedImg.value)
+    await nextTick()
+    clickedImg.value = document.activeElement
+    setBrightness(clickedImg.value, 1.2)
+    clickedMarker.value = stolperstein
+    const sameCoords = sparqlResult.value.filter(stolp => stolp.latitude.value === stolperstein.latitude.value && stolp.longitude.value === stolperstein.longitude.value)
+    allClickedMarkers.value = sameCoords
+}
+
+watchEffect(() => {
+    if (! clickedMarker.value && clickedImg.value) 
+        setBrightness(clickedImg.value)
+})
 
 provide("allClickedMarkers", allClickedMarkers);
 
 // paramètre test si url avec ?test=1
-const test = !!useRoute().query.test;
+const test = !!useRoute().query.test
 
 const zoom = ref(15);
 // const center = ref([47.413220, -1.219482]);
@@ -91,12 +108,14 @@ const currentCity = ref(cities[0].id);
 
 const request = computed(() =>
 `#title: Stolpersteine
-SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?person ?personLabel 
+SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?person ?personLabel 
 (GROUP_CONCAT(DISTINCT ?lieuDetentionLabel; SEPARATOR = " | ") AS ?lieuDetentionLabels) 
 (GROUP_CONCAT(DISTINCT ?lieuNaissanceLabel; SEPARATOR = " | ") AS ?lieuNaissanceLabels) 
 (GROUP_CONCAT(DISTINCT ?lieuMortLabel; SEPARATOR = " | ") AS ?lieuMortLabels) 
 (GROUP_CONCAT(DISTINCT ?dateNaissanceLabel; SEPARATOR = " | ") AS ?dateNaissanceLabels) 
-(GROUP_CONCAT(DISTINCT ?dateMortLabel; SEPARATOR = " | ") AS ?dateMortLabels) WHERE {
+(GROUP_CONCAT(DISTINCT ?dateMortLabel; SEPARATOR = " | ") AS ?dateMortLabels) 
+(GROUP_CONCAT(DISTINCT ?imageLabel; SEPARATOR = " | ") AS ?imageLabels) 
+WHERE {
   SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],fr". }
   ?stolperstein (wdt:P31/(wdt:P279*)) wd:Q26703203;
     wdt:P131 wd:${currentCity.value};
@@ -115,11 +134,12 @@ SELECT ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?per
     ?lieuMort rdfs:label ?lieuMortLabel.
     ?dateNaissance rdfs:label ?dateNaissanceLabel.
     ?dateMort rdfs:label ?dateMortLabel.
+    ?image rdfs:label ?imageLabel.
   }
   BIND(geof:latitude(?coords) AS ?latitude)
   BIND(geof:longitude(?coords) AS ?longitude)
 }
-GROUP BY ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?image ?person ?personLabel   `
+GROUP BY ?stolperstein ?stolpersteinLabel ?coords ?latitude ?longitude ?person ?personLabel   `
 )
 
 const url = computed(() => `https://query.wikidata.org/sparql?query=${encodeURIComponent(request.value)}&format=json`)
@@ -151,9 +171,10 @@ const { data: citiesResult, error: citiesError, status: citiesStatus, execute: c
 
 // Calcule le centre de la carte
 const centerPoint = computed(() => {
-    if (sparqlResult.value?.length > 0) {
-        const lat = sparqlResult.value.reduce((acc, stolperstein) => acc + parseFloat(stolperstein.latitude.value), 0) / sparqlResult.value.length;
-        const lon = sparqlResult.value.reduce((acc, stolperstein) => acc + parseFloat(stolperstein.longitude.value), 0) / sparqlResult.value.length;
+    if (filteredResults.value?.length > 0) {
+        const usedResults = filteredResults.value?.length === 1 ? filteredResults.value : sparqlResult.value;
+        const lat = usedResults.reduce((acc, stolperstein) => acc + parseFloat(stolperstein.latitude.value), 0) / usedResults.length;
+        const lon = usedResults.reduce((acc, stolperstein) => acc + parseFloat(stolperstein.longitude.value), 0) / usedResults.length;
         return [lat, lon];
     }
 })
@@ -169,9 +190,19 @@ onMounted(() => {
 
 watch(currentCity, () => search.value = '');
 
+// watch(search, () => {
+//     if (search.value) {
+//         zoom.value = 15;
+//     }
+// })
+
 watchEffect(() => {
     // on vérifie si certains points sont au même endroit
+
     if (sparqlResult.value?.length > 0) {
+    console.log(sparqlResult.value);
+    // console.log(Object.groupBy(sparqlResult.value, s => s.person.value));
+
         const coordCounts = {};
         sparqlResult.value.forEach(stolperstein => {
             const coord = `${stolperstein.latitude.value},${stolperstein.longitude.value}`;

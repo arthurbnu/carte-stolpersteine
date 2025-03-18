@@ -19,11 +19,11 @@
                     {{ toFrenchDate(stolperstein.dateMortLabels?.value) }} ({{ stolperstein.lieuMortLabels?.value }})
                 </p>
 
-                <p>
-                    Lieu·x de détention : {{ stolperstein.lieuDetentionLabels?.value || 'Non trouvé'}}
+                <p v-if = "stolperstein.lieuDetentionLabels?.value">
+                    Lieu·x de détention : {{ stolperstein.lieuDetentionLabels.value}}
                 </p>
 
-                <img v-if="stolperstein.image" :src="stolperstein.image.value"
+                <img v-for="(image, id) in getImages(stolperstein)" :src="image" :key="id"
                     :alt="stolperstein.stolpersteinLabel.value"
                     class="my-3 max-w-[70vw] max-h-[60vh] md:max-w-[70%] md:max-h-[20%]" />
             </li>
@@ -34,8 +34,9 @@
 <script setup>
 
 const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-const dateSeparator = " | ";
-const toFrenchDate = date => date.split(dateSeparator).map(d => new Date(d).toLocaleDateString('fr-FR', dateOptions)).join(dateSeparator);
+const valueSeparator = " | ";
+const toFrenchDate = date => date.split(valueSeparator).map(d => new Date(d).toLocaleDateString('fr-FR', dateOptions)).join(valueSeparator);
+
 
 const mounted = ref(false);
 onMounted(() => {
@@ -50,6 +51,8 @@ const props = defineProps({
         required: true
     },
 })
+
+const getImages = stol => stol.imageLabels?.value.split(valueSeparator).filter(img => img !== "")
 
 const allClickedMarkers = inject("allClickedMarkers");
 
