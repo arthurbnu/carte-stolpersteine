@@ -23,7 +23,7 @@
                     Lieu·x de détention : {{ stolperstein.lieuDetentionLabels.value}}
                 </p>
 
-                <img v-for="(image, id) in getImages(stolperstein)" :src="image" :key="id"
+                <img v-for="(image, id) in getImages(stolperstein)" :src="image + '?width=300'" :key="id"
                     :alt="stolperstein.stolpersteinLabel.value"
                     class="my-3 max-w-[70vw] max-h-[60vh] md:max-w-[70%] md:max-h-[20%]" />
             </li>
